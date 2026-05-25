@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TrueCollabs Smart Gate</title>
+  <style>
+    body{font-family:Arial;background:#111;color:#fff;margin:0;padding:20px}
+    .card{background:#222;padding:16px;border-radius:10px;max-width:900px;margin:0 auto}
+    button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;margin:4px}
+    .green{background:#218838;color:#fff}.red{background:#c82333;color:#fff}
+    input,select{padding:8px;border-radius:8px;border:1px solid #666;background:#000;color:#fff}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>TrueCollabs Smart Gate Control</h1>
+    <p>Choose device and send commands. ESP32 polls this server for execution.</p>
+
+    <label>Device:</label>
+    <select id="device"></select>
+    <div id="status"></div>
+
+    <h3>Gate</h3>
+    <button class="green" onclick="sendCmd('OPEN')">OPEN</button>
+    <button class="red" onclick="sendCmd('CLOSE')">CLOSE</button>
+
+    <h3>Password</h3>
+    <input id="pass" maxlength="6" placeholder="6 digits" />
+    <button onclick="sendCmd('PASSWORD', document.getElementById('pass').value)">SET PASSWORD</button>
+
+    <h3>Fingerprint</h3>
+    <input id="fid" type="number" placeholder="Finger ID" />
+    <button onclick="sendCmd('ENROLL', document.getElementById('fid').value)">ENROLL</button>
+    <button onclick="sendCmd('DELETE', document.getElementById('fid').value)">DELETE</button>
+  </div>
+
+<script>
+async function loadDevices(){
+  const res = await fetch('/api/devices/');
+  const devices = await res.json();
+  const sel = document.getElementById('device');
+  sel.innerHTML = '';
+  devices.forEach(d=>{
+    const o=document.createElement('option');
+    o.value=d.device_id;
+    o.textContent=`${d.name} (${d.device_id})`;
+    sel.appendChild(o);
+  });
+  if(devices[0]) renderStatus(devices[0]);
+  sel.onchange=()=>{const d=devices.find(x=>x.device_id===sel.value); if(d) renderStatus(d);};
+}
+
+function renderStatus(d){
+  document.getElementById('status').innerHTML = `Gate: ${d.gate_status} | Finger: ${d.finger_status} | Password: ${d.password_mask} | Last Seen: ${d.last_seen || 'N/A'}`;
+}
+
+async function sendCmd(command, value=''){
+  const device = document.getElementById('device').value;
+  if(!device) return alert('No device found. Create one in Django admin.');
+  const res = await fetch(`/api/devices/${device}/commands/`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({command, value})
+  });
+  if(!res.ok){ alert('Failed to queue command'); return; }
+  alert('Command queued. ESP32 will execute on next poll.');
+}
+
+loadDevices();
+setInterval(loadDevices, 5000);
+</script>
+</body>
+</html>

@@ -4,35 +4,139 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TrueCollabs Smart Gate</title>
+  <link rel="icon" type="image/png" href="https://github.com/laraibhussain1109/image/blob/main/ng_logo-removebg-preview.png?raw=true" />
   <style>
-    body{font-family:Arial;background:#111;color:#fff;margin:0;padding:20px}
-    .card{background:#222;padding:16px;border-radius:10px;max-width:900px;margin:0 auto}
-    button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;margin:4px}
-    .green{background:#218838;color:#fff}.red{background:#c82333;color:#fff}
-    input,select{padding:8px;border-radius:8px;border:1px solid #666;background:#000;color:#fff}
+    :root{
+      --green:#3cff7c;
+      --blue:#00d2ff;
+      --black:#070b12;
+      --white:#f5fbff;
+      --panel:#0f1624cc;
+      --danger:#ff4f6d;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      color:var(--white);
+      background: radial-gradient(circle at 20% 20%, #0f3247 0%, #091421 25%, #05080d 70%, #000 100%);
+      padding:24px;
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        linear-gradient(120deg, #00d2ff22, transparent 40%),
+        linear-gradient(300deg, #3cff7c22, transparent 45%);
+      animation: pulse 6s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes pulse {
+      from{transform:scale(1);filter:hue-rotate(0deg)}
+      to{transform:scale(1.04);filter:hue-rotate(20deg)}
+    }
+    .card{
+      position:relative;
+      backdrop-filter: blur(10px);
+      background:var(--panel);
+      border:1px solid #25a6d966;
+      padding:20px;
+      border-radius:18px;
+      max-width:980px;
+      margin:0 auto;
+      box-shadow:0 20px 45px #0009, inset 0 0 40px #3cff7c12;
+      animation: floatIn .7s ease-out;
+    }
+    @keyframes floatIn{
+      from{opacity:0; transform: translateY(16px)}
+      to{opacity:1; transform: translateY(0)}
+    }
+    .header{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    .logo{width:62px;height:62px;object-fit:contain;border-radius:12px;background:#00131e;padding:7px;border:1px solid #3cff7c55}
+    h1{margin:0;font-size:clamp(1.2rem,3vw,2rem);letter-spacing:.4px}
+    .subtitle{margin:8px 0 16px;color:#c7e9f8}
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+    }
+    .panel{
+      background:#0a1020d1;
+      border:1px solid #24c3ed44;
+      border-radius:14px;
+      padding:14px;
+    }
+    .full{grid-column:1/-1}
+    label{display:block;margin-bottom:8px;color:#bdf6ff}
+    button{
+      padding:11px 16px;border:0;border-radius:10px;cursor:pointer;margin:4px;
+      font-weight:700; transition:all .25s ease;
+    }
+    button:hover{transform:translateY(-2px);box-shadow:0 8px 20px #0008}
+    .green{background:linear-gradient(90deg,#00c56f,#31ff96);color:#001b0d}
+    .red{background:linear-gradient(90deg,#ba2145,#ff5d7c);color:#fff}
+    input,select{
+      width:100%;
+      padding:10px;border-radius:10px;border:1px solid #24c3ed5c;background:#020910;color:#fff
+    }
+    .status-badge{
+      display:inline-block;
+      margin-top:10px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:.88rem;
+    }
+    .online{background:#38ff8d2b;color:#86ffbd;border:1px solid #30ff8d6e}
+    .offline{background:#ff4f6d2b;color:#ff9daf;border:1px solid #ff4f6d75}
+    #status{line-height:1.75}
+    @media (max-width:760px){
+      body{padding:14px}
+      .grid{grid-template-columns:1fr}
+      .card{padding:14px}
+      button{width:100%}
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>TrueCollabs Smart Gate Control</h1>
+    <div class="header">
+      <img class="logo" src="https://github.com/laraibhussain1109/image/blob/main/ng_logo-removebg-preview.png?raw=true" alt="Nirwana Gate logo"/>
+      <div>
+        <h1>TrueCollabs Smart Gate Control</h1>
+        <p class="subtitle">Futuristic control center for your smart gate devices.</p>
+      </div>
+    </div>
     <p>Choose device and send commands. ESP32 polls this server for execution.</p>
 
-    <label>Device:</label>
-    <select id="device"></select>
-    <div id="status"></div>
+    <div class="grid">
+      <div class="panel full">
+        <label>Device:</label>
+        <select id="device"></select>
+        <div id="status"></div>
+      </div>
 
-    <h3>Gate</h3>
-    <button class="green" onclick="sendCmd('OPEN')">OPEN</button>
-    <button class="red" onclick="sendCmd('CLOSE')">CLOSE</button>
+      <div class="panel">
+        <h3>Gate</h3>
+        <button class="green" onclick="sendCmd('OPEN')">OPEN</button>
+        <button class="red" onclick="sendCmd('CLOSE')">CLOSE</button>
+      </div>
 
-    <h3>Password</h3>
-    <input id="pass" maxlength="6" placeholder="6 digits" />
-    <button onclick="sendCmd('PASSWORD', document.getElementById('pass').value)">SET PASSWORD</button>
+      <div class="panel">
+        <h3>Password</h3>
+        <input id="pass" maxlength="6" placeholder="6 digits" />
+        <button class="green" onclick="sendCmd('PASSWORD', document.getElementById('pass').value)">SET PASSWORD</button>
+      </div>
 
-    <h3>Fingerprint</h3>
-    <input id="fid" type="number" placeholder="Finger ID" />
-    <button onclick="sendCmd('ENROLL', document.getElementById('fid').value)">ENROLL</button>
-    <button onclick="sendCmd('DELETE', document.getElementById('fid').value)">DELETE</button>
+      <div class="panel full">
+        <h3>Fingerprint</h3>
+        <input id="fid" type="number" placeholder="Finger ID" />
+        <button class="green" onclick="sendCmd('ENROLL', document.getElementById('fid').value)">ENROLL</button>
+        <button class="red" onclick="sendCmd('DELETE', document.getElementById('fid').value)">DELETE</button>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -52,7 +156,10 @@ async function loadDevices(){
 }
 
 function renderStatus(d){
-  document.getElementById('status').innerHTML = `Gate: ${d.gate_status} | Finger: ${d.finger_status} | Password: ${d.password_mask} | Last Seen: ${d.last_seen || 'N/A'}`;
+  const isOnline = d.last_seen ? (Date.now() - new Date(d.last_seen).getTime()) <= 5 * 60 * 1000 : false;
+  const badge = `<span class="status-badge ${isOnline ? 'online' : 'offline'}">${isOnline ? 'Online' : 'Offline'}</span>`;
+  document.getElementById('status').innerHTML =
+    `${badge}<br>Gate: ${d.gate_status} | Finger: ${d.finger_status} | Password: ${d.password_mask} | Last Seen: ${d.last_seen || 'N/A'}`;
 }
 
 async function sendCmd(command, value=''){

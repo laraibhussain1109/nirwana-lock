@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
+    path('logout/', views.logout_view, name='logout'),
     path('api/devices/', views.devices, name='devices'),
     path('api/devices/<str:device_id>/commands/', views.create_command, name='create_command'),
     path('api/cloud/next-command/', views.next_command, name='next_command'),

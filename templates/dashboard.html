@@ -53,7 +53,7 @@
       from{opacity:0; transform: translateY(16px)}
       to{opacity:1; transform: translateY(0)}
     }
-    .header{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    .header{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
     .logo{width:62px;height:62px;object-fit:contain;border-radius:12px;background:#00131e;padding:7px;border:1px solid #3cff7c55}
     h1{margin:0;font-size:clamp(1.2rem,3vw,2rem);letter-spacing:.4px}
     .subtitle{margin:8px 0 16px;color:#c7e9f8}
@@ -75,6 +75,8 @@
       font-weight:700; transition:all .25s ease;
     }
     button:hover{transform:translateY(-2px);box-shadow:0 8px 20px #0008}
+    .logout-btn{background:transparent;border:1px solid #24c3ed88;color:#d6f6ff;padding:10px 14px;text-decoration:none;display:inline-block;border-radius:10px;font-weight:700}
+    .logout-btn:hover{background:#24c3ed22}
     .green{background:linear-gradient(90deg,#00c56f,#31ff96);color:#001b0d}
     .red{background:linear-gradient(90deg,#ba2145,#ff5d7c);color:#fff}
     input,select{
@@ -108,6 +110,7 @@
         <h1>TrueCollabs Smart Gate Control</h1>
         <p class="subtitle">Futuristic control center for your smart gate devices.</p>
       </div>
+      <a class="logout-btn" href="/logout/">Logout</a>
     </div>
     <p>Choose device and send commands. ESP32 polls this server for execution.</p>
 
@@ -161,11 +164,29 @@ async function loadDevices(){
   sel.onchange=()=>{const d=devices.find(x=>x.device_id===sel.value); if(d) renderStatus(d);};
 }
 
+function formatLastSeenIst(lastSeen){
+  if(!lastSeen) return 'N/A';
+  const dt = new Date(lastSeen);
+  if(Number.isNaN(dt.getTime())) return 'N/A';
+  return new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+    timeZoneName: 'short'
+  }).format(dt);
+}
+
 function renderStatus(d){
   const isOnline = d.last_seen ? (Date.now() - new Date(d.last_seen).getTime()) <= 5 * 60 * 1000 : false;
   const badge = `<span class="status-badge ${isOnline ? 'online' : 'offline'}">${isOnline ? 'Online' : 'Offline'}</span>`;
+  const lastSeenText = formatLastSeenIst(d.last_seen);
   document.getElementById('status').innerHTML =
-    `${badge}<br>Gate: ${d.gate_status} | Finger: ${d.finger_status} | Password: ${d.password_mask} | Last Seen: ${d.last_seen || 'N/A'}`;
+    `${badge}<br>Gate: ${d.gate_status} | Finger: ${d.finger_status} | Password: ${d.password_mask} | Last Seen (IST, GMT+05:30): ${lastSeenText}`;
 }
 
 async function sendCmd(command, value=''){

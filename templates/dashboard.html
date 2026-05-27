@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TrueCollabs Smart Gate</title>
+  <title>NirwanaGrid Smart Lock</title>
   <link rel="icon" type="image/png" href="https://github.com/laraibhussain1109/image/blob/main/ng_logo-removebg-preview.png?raw=true" />
   <style>
     :root{
@@ -107,12 +107,12 @@
     <div class="header">
       <img class="logo" src="https://github.com/laraibhussain1109/image/blob/main/ng_logo-removebg-preview.png?raw=true" alt="Nirwana Gate logo"/>
       <div>
-        <h1>TrueCollabs Smart Gate Control</h1>
-        <p class="subtitle">Futuristic control center for your smart gate devices.</p>
+        <h1>NirwanaGrid Smart Lock Control</h1>
+        <p class="subtitle">Futuristic control center for your smart lock devices.</p>
       </div>
       <a class="logout-btn" href="/logout/">Logout</a>
     </div>
-    <p>Choose device and send commands. ESP32 polls this server for execution.</p>
+    <p>Choose device and send commands for execution.</p>
 
     <div class="grid">
       <div class="panel full">
@@ -191,7 +191,7 @@ function renderStatus(d){
 
 async function sendCmd(command, value=''){
   const device = document.getElementById('device').value;
-  if(!device) return alert('No device found. Create one in Django admin.');
+  if(!device) return alert('No device found. Create one in NirwanaGrid Lock Admin.');
   const csrftoken = getCookie('csrftoken');
   const res = await fetch(`/api/devices/${device}/commands/`, {
     method:'POST',
@@ -199,7 +199,7 @@ async function sendCmd(command, value=''){
     body: JSON.stringify({command, value})
   });
   if(!res.ok){ alert('Failed to queue command'); return; }
-  alert('Command queued. ESP32 will execute on next poll.');
+  alert('Command queued. It will execute on next poll.');
 }
 
 loadDevices();

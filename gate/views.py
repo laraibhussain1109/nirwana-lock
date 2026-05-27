@@ -1,24 +1,30 @@
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Command, Device, DeviceEvent
 from .serializers import CommandSerializer, DeviceSerializer
 
 
+@login_required(login_url='/admin/login/')
 def dashboard(request):
     devices = Device.objects.all()
     return render(request, 'dashboard.html', {'devices': devices})
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def devices(request):
     return Response(DeviceSerializer(Device.objects.all(), many=True).data)
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_command(request, device_id):
     device = get_object_or_404(Device, device_id=device_id)
     payload = request.data.copy()

@@ -1,5 +1,6 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -16,6 +17,13 @@ def dashboard(request):
     devices = Device.objects.all()
     return render(request, 'dashboard.html', {'devices': devices})
 
+
+
+
+@login_required(login_url='/admin/login/')
+def logout_view(request):
+    logout(request)
+    return redirect('/admin/login/')
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

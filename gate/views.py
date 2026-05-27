@@ -11,6 +11,8 @@ from rest_framework.response import Response
 from .models import Command, Device, DeviceEvent
 from .serializers import CommandSerializer, DeviceSerializer
 
+COMMAND_TTL_SECONDS = 120
+
 
 @login_required(login_url='/admin/login/')
 def dashboard(request):
@@ -51,6 +53,13 @@ def next_command(request):
     device = get_object_or_404(Device, device_id=device_id, token=token)
     device.last_seen = timezone.now()
     device.save(update_fields=['last_seen'])
+
+    expiration_cutoff = timezone.now() - timezone.timedelta(seconds=COMMAND_TTL_SECONDS)
+    expired_commands = device.commands.filter(executed_at__isnull=True, created_at__lt=expiration_cutoff)
+    expired_count = expired_commands.count()
+    if expired_count:
+        expired_commands.delete()
+        DeviceEvent.objects.create(device=device, message=f"Discarded {expired_count} expired command(s)")
 
     cmd = device.commands.filter(executed_at__isnull=True).order_by('created_at').first()
     if not cmd:
